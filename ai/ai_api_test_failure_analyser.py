@@ -28,16 +28,25 @@ def dispatch_tool(name: str, arguments: dict) -> dict:
     if name != "lookup_error_pattern":
         return {
             "error": True,
-            "message": f"Unsupported tool: {name}",
+            "message": f"Unsupported tool: {name}"
+        }
+
+    if (
+        not isinstance(arguments, dict)
+        or set(arguments) != {"error_type"}
+        or not isinstance(arguments["error_type"], str)
+    ):
+        return {
+            "error": True,
+            "message": "Invalid arguments for lookup_error_pattern"
         }
 
     try:
         return lookup_error_pattern(**arguments)
-
     except Exception:
         return {
             "error": True,
-            "message": "Tool execution failed. No result is available.",
+            "message": "Tool execution failed. No result is available."
         }
 
 client = OpenAI()
