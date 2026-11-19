@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Pytest - Booking API",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-v", "-s", "tests/test_booking_api.py"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}

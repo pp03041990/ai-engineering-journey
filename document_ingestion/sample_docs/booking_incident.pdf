@@ -1,0 +1,23 @@
+
+INCIDENT ID: INC-2026-107
+Service: Booking API
+Severity: Medium
+
+Issue:
+Booking API returned HTTP 404 when retrieving an existing booking.
+
+Expected:
+HTTP 200 with booking details.
+
+Actual:
+HTTP 404 Not Found.
+
+Root Cause:
+A deployment introduced an incorrect booking ID mapping.
+
+Resolution:
+The booking lookup mapping was corrected.
+
+QA Validation:
+Verified that existing bookings return HTTP 200.
+Verified that nonexistent bookings return HTTP 404.
