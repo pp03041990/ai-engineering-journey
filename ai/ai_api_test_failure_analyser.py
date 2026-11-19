@@ -89,8 +89,8 @@ def ai_analyse_failure(failure_details):
             for call in function_calls:
                 try:
                     print("Tool requested:", call.name)
-                    print("Tool arguments:", arguments)
                     arguments = json.loads(call.arguments)
+                    print("Tool arguments:", arguments)
                 except json.JSONDecodeError:
                     result = {
                         "error": True,
