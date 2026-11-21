@@ -5,7 +5,7 @@ import pytest
 @pytest.mark.parametrize(
     "booking_id,expected_status",
     [
-        # ('10',200),
+        ('10',200),
         ('999999999',200)
     ]
 )

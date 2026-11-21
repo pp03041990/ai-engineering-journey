@@ -1,6 +1,7 @@
-import pytest
-from rag.rag_pipeline import analyse_failure_with_rag
 
+import pytest
+
+from ai.investigation_orchestrator import investigate_failure
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
@@ -14,46 +15,42 @@ def pytest_runtest_makereport(item, call):
         "test_name": item.nodeid,
         "error": report.longreprtext
     }
+    state = investigate_failure(failure)
+    if state.status == "FAILED":
+        print(f"\nAI investigation failed: {state.errors}")
+        return
 
-    
-    try:
-        result = analyse_failure_with_rag(
-            failure,
-            evaluate=True
-        )
+    analysis = state.analysis
+    evaluation = state.grounding_evaluation
+    retrieved_defects = state.retrieved_defects
+    print("\n===== INVESTIGATION SUMMARY =====")
+    print(f"Test: {state.test_name}")
+    print(f"Route: {state.route}")
+    print(f"Status: {state.status}")
+    print(f"Completed steps: {state.completed_steps}")
+    print(f"Errors: {state.errors}")
 
-        if result is None:
-            print("\nAI analysis not generated")
-            return
+    print("\n===== RETRIEVED HISTORICAL DEFECTS =====")
 
-        analysis = result["analysis"]
-        evaluation = result["grounding_evaluation"]
-        retrieved_defects = result["retrieved_defects"]
+    for defect in retrieved_defects:
+        print(f"{defect['id']}: {defect['description']}")
 
-        print("\n===== RETRIEVED HISTORICAL DEFECTS =====")
+    print("\n===== AI FAILURE ANALYSIS =====")
 
-        for defect in retrieved_defects:
-            print(f"{defect['id']}: {defect['description']}")
+    print(f"\nLikely cause:\n{analysis['likely_cause']}")
 
-        print("\n===== AI FAILURE ANALYSIS =====")
+    print("\nDebugging steps:")
+    for step in analysis["debugging_steps"]:
+        print(f"- {step}")
 
-        print(f"\nLikely cause:\n{analysis['likely_cause']}")
+    print(f"\nDefect type:\n{analysis['defect_type']}")
 
-        print("\nDebugging steps:")
-        for step in analysis["debugging_steps"]:
-            print(f"- {step}")
+    print("\n===== GROUNDING EVALUATION =====")
 
-        print(f"\nDefect type:\n{analysis['defect_type']}")
+    print(f"\nIs grounded: {evaluation['is_grounded']}")
 
-        print("\n===== GROUNDING EVALUATION =====")
+    print("\nUnsupported claims:")
+    for claim in evaluation["unsupported_claims"]:
+        print(f"- {claim}")
 
-        print(f"\nIs grounded: {evaluation['is_grounded']}")
-
-        print("\nUnsupported claims:")
-        for claim in evaluation["unsupported_claims"]:
-            print(f"- {claim}")
-
-        print(f"\nExplanation:\n{evaluation['explanation']}")
-
-    except Exception as exc:
-        print(f"\nAI analysis unavailable: {exc}")
+    print(f"\nExplanation:\n{evaluation['explanation']}")

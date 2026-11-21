@@ -1,52 +1,59 @@
 import pytest
-from ai.ai_api_test_failure_analyser import ai_analyse_failure
-import requests
+from rag.rag_pipeline import analyse_failure_with_rag
+
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
-    outcome=yield
+    outcome = yield
     report = outcome.get_result()
-    if report.when == 'call' and report.failed:
-        failure_details= f"""
-        test name: {item.nodeid},
-        failure details: {report.longreprtext}
-        Analyze the failure and return:
-        - likely_cause: string
-        - debugging_steps: array of two strings
-        - defect_type: string
-        """
-        analysis=ai_analyse_failure(failure_details)
-        # try:
-        #     response=requests.post(
-        #         "http://127.0.0.1:8000/analyse-failure",
-        #         json={
-        #         "failure_details": failure_details
-        #     },
-        #     timeout=30  
-        #     )
-        #     if response.status_code == 200:
-        #         analysis = response.json()
-        #         print(f"likely_cause : \n{analysis['likely_cause']}")
-        #         print("Debugging steps \n")
-        #         debugging_steps=analysis["debugging_steps"]
-        #         for step in debugging_steps:
-        #                 print(step)
-        #         print(f"defect_type : \n{analysis['defect_type']}")
-        #     elif response.status_code == 503:
-        #         print("AI analysis unavailable. Skipping AI report.")
-        #     else:
-        #         print(
-        #             f"\n AI analysis returned "
-        #             f"{response.status_code}"
-        #         )
-        # except requests.exceptions.RequestException as exc:
-        #     print(f"AI analysis unavailable {exc}")
-        if analysis is not None:
-            print(f"likely_cause : \n{analysis['likely_cause']}")
-            print("Debugging steps \n")
-            debugging_steps=analysis["debugging_steps"]
-            for step in debugging_steps:
-                    print(step)
-            print(f"defect_type : \n{analysis['defect_type']}")
-        else:
-            print("AI analysis not generated")
-        
+
+    if report.when != "call" or not report.failed:
+        return
+
+    failure = {
+        "test_name": item.nodeid,
+        "error": report.longreprtext
+    }
+
+    
+    try:
+        result = analyse_failure_with_rag(
+            failure,
+            evaluate=True
+        )
+
+        if result is None:
+            print("\nAI analysis not generated")
+            return
+
+        analysis = result["analysis"]
+        evaluation = result["grounding_evaluation"]
+        retrieved_defects = result["retrieved_defects"]
+
+        print("\n===== RETRIEVED HISTORICAL DEFECTS =====")
+
+        for defect in retrieved_defects:
+            print(f"{defect['id']}: {defect['description']}")
+
+        print("\n===== AI FAILURE ANALYSIS =====")
+
+        print(f"\nLikely cause:\n{analysis['likely_cause']}")
+
+        print("\nDebugging steps:")
+        for step in analysis["debugging_steps"]:
+            print(f"- {step}")
+
+        print(f"\nDefect type:\n{analysis['defect_type']}")
+
+        print("\n===== GROUNDING EVALUATION =====")
+
+        print(f"\nIs grounded: {evaluation['is_grounded']}")
+
+        print("\nUnsupported claims:")
+        for claim in evaluation["unsupported_claims"]:
+            print(f"- {claim}")
+
+        print(f"\nExplanation:\n{evaluation['explanation']}")
+
+    except Exception as exc:
+        print(f"\nAI analysis unavailable: {exc}")
