@@ -1,0 +1,12 @@
+{
+  "execution": {
+    "test_name": "booking_api",
+    "framework": "pytest",
+    "status": "PASSED",
+    "exit_code": 0,
+    "stdout": "============================= test session starts ==============================\nplatform darwin -- Python 3.14.8, pytest-9.1.1, pluggy-1.6.0 -- /Users/manishpushkar/Projects/ai-engineering-journey/.venv/bin/python\ncachedir: .pytest_cache\nrootdir: /Users/manishpushkar/Projects/ai-engineering-journey\nplugins: anyio-4.15.1\ncollecting ... collected 1 item\n\ntests/test_booking_api.py::test_booking_status[10-200] PASSED            [100%]\n\n=============================== warnings summary ===============================\n.venv/lib/python3.14/site-packages/chromadb/telemetry/opentelemetry/__init__.py:128\n  /Users/manishpushkar/Projects/ai-engineering-journey/.venv/lib/python3.14/site-packages/chromadb/telemetry/opentelemetry/__init__.py:128: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead\n    if asyncio.iscoroutinefunction(f):\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n========================= 1 passed, 1 warning in 0.87s =========================\n",
+    "stderr": "",
+    "evidence": {}
+  },
+  "investigation": null
+}

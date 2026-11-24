@@ -19,6 +19,7 @@ class InvestigationState(BaseModel):
         "TEST_DATA", "AUTH", "SERVICE", "ASSERTION", "GENERAL"
     ] | None = None
     completed_steps: list[str] = Field(default_factory=list)
+    evidence: dict = Field(default_factory=dict)
 
 if __name__ == "__main__":
     state = InvestigationState(test_name="Test001",error="Test failed with error 503")

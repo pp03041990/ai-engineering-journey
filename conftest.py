@@ -1,6 +1,6 @@
 
 import pytest
-
+import os
 from ai.investigation_orchestrator import investigate_failure
 
 @pytest.hookimpl(hookwrapper=True)
@@ -15,6 +15,10 @@ def pytest_runtest_makereport(item, call):
         "test_name": item.nodeid,
         "error": report.longreprtext
     }
+
+    if os.getenv("AI_AGENT_MANAGED_RUN") == "1":
+        return
+    
     state = investigate_failure(failure)
     if state.status == "FAILED":
         print(f"\nAI investigation failed: {state.errors}")
